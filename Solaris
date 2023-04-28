@@ -1,0 +1,1476 @@
+local blacklist = {
+   
+}
+
+local function onPlayerAdded(player)
+    if table.find(blacklist, player.UserId) then
+        player:Kick("You have been banned from using this script.")
+    end
+end
+
+game.Players.PlayerAdded:Connect(onPlayerAdded)
+
+for _, player in ipairs(game.Players:GetPlayers()) do
+    onPlayerAdded(player)
+end
+
+
+
+
+-- Solaris Exploits
+-- Version: 0.6
+
+-----////////////////////////////////////////////////////////////////-----[Chat Spy]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+
+if game.PlaceId == 155615604 then
+
+enabled = true
+spyOnMyself = true
+public = false
+publicItalics = true
+privateProperties = {
+	Color = Color3.fromRGB(255,0,0); 
+	Font = Enum.Font.SourceSansBold;
+	TextSize = 18;
+}
+
+local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait() or Players.LocalPlayer
+local saymsg = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest")
+local getmsg = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("OnMessageDoneFiltering")
+local instance = (_G.chatSpyInstance or 0) + 1
+_G.chatSpyInstance = instance
+
+local function onChatted(p,msg)
+	if _G.chatSpyInstance == instance then
+		if p==player and msg:lower():sub(1,4)=="/devmode" then
+			enabled = not enabled
+			wait(0.3)
+			privateProperties.Text = "[Solaris Exploits]: "..(enabled and "En" or "Dis").."abled"
+			StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
+		elseif enabled and (spyOnMyself==false or p~=player) then
+			msg = msg:gsub("[\n\r]",''):gsub("\t",' '):gsub("[ ]+",' ')
+			local hidden = true
+			local conn = getmsg.OnClientEvent:Connect(function(packet,channel)
+				if packet.SpeakerUserId==p.UserId and packet.Message==msg:sub(#msg-#packet.Message+1) and (channel=="All" or (channel=="Team" and public==false and Players[packet.FromSpeaker].Team==player.Team)) then
+					hidden = false
+				end
+			end)
+			wait(1)
+			conn:Disconnect()
+			if hidden and enabled then
+				if public then
+					saymsg:FireServer((publicItalics and "/me " or '').."[Solaris Exploits]: [".. p.Name .."] "..msg,"All")
+				else
+					privateProperties.Text = "[Solaris Exploits]: [".. p.Name .."]: "..msg
+					StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
+				end
+			end
+		end
+	end
+end
+
+for _,p in ipairs(Players:GetPlayers()) do
+	p.Chatted:Connect(function(msg) onChatted(p,msg) end)
+end
+Players.PlayerAdded:Connect(function(p)
+	p.Chatted:Connect(function(msg) onChatted(p,msg) end)
+end)
+
+privateProperties.Text = "[Solaris Exploits]: "..(enabled and "En" or "Dis").."abled"
+StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
+if not player.PlayerGui:FindFirstChild("Chat") then wait(3) end
+local chatFrame = player.PlayerGui.Chat.Frame
+chatFrame.ChatChannelParentFrame.Visible = true
+chatFrame.ChatBarParentFrame.Position = chatFrame.ChatChannelParentFrame.Position+UDim2.new(UDim.new(),chatFrame.ChatChannelParentFrame.Size.Y)
+
+local function getTimezoneName()
+local timezone = os.date("%Z") 
+return timezone
+end
+local maxPlayers = game:GetService("Players").MaxPlayers
+local daysSinceCreation = math.floor((os.time() - game.Players.LocalPlayer.AccountAge * 86400) / 86400)
+local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+local playerName = game.Players.LocalPlayer.Name
+local gameId = tostring(game.PlaceId)
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local colors = {
+    SchemeColor = Color3.fromRGB(255, 0, 0),
+    Background = Color3.fromRGB(33, 33, 33),
+    Header = Color3.fromRGB(26, 25, 25),
+    TextColor = Color3.fromRGB(255,255,255),
+    ElementColor = Color3.fromRGB(26, 25, 25)
+}
+local Window = Library.CreateLib("Solaris Exploits", colors)
+local menuColor = Color3.fromRGB(26, 25, 25)
+local menuColor2 = Color3.fromRGB(255, 0, 0)
+
+
+-----////////////////////////////////////////////////////////////////-----[Join/Leave]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+
+game.Players.PlayerAdded:Connect(function(player)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Player Joined",
+        Text = player.Name .. " has joined the game.",
+        Duration = 5,
+    })
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Player Left",
+        Text = player.Name .. " has left the game.",
+        Duration = 5,
+    })
+end)
+
+
+
+-----////////////////////////////////////////////////////////////////-----[Welcome]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+
+local Tab = Window:NewTab("Welcome")
+local WelcomeSection = Tab:NewSection("Welcome, " .. playerName)
+WelcomeSection:NewButton("Player Name: " .. playerName, "ButtonInfo", function()
+print("Clicked")
+end)
+WelcomeSection:NewButton("Game: " .. gameId .. " | " .. gameName .. "", "ButtonInfo", function()
+print("Clicked")
+end)
+WelcomeSection:NewButton("Players Ingame: " .. tostring(game:GetService("Players").NumPlayers) .. " | Max Players: " .. tostring(maxPlayers), "ButtonInfo", function()
+print("Clicked")
+end)
+
+local WelcomeSection = Tab:NewSection("Feedback")
+
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1100875009012011028/BX27A-XD2173JGU3Dyb6V2B4JzwKHVyQf69ZaLg7WM48doN7eMdjlCg_JAFWfOYQLYej"
+local BOT_TOKEN = "MTEwMDg2OTI1NTk3NDYzNzcxOA.GML8sa.IspysZ88Dv-21vhwKaKi7MWDlNmq3RommObuWw"
+
+-- This function sends a message to your Discord server via a webhook
+local function sendWebhookMessage(username, userId, message, avatarUrl)
+    local data = {
+        embeds = {
+            {
+                title = "New Bug Report",
+                description = message,
+                fields = {
+                    {
+                        name = "Username",
+                        value = username,
+                        inline = true,
+                    },
+                    {
+                        name = "UserID",
+                        value = userId,
+                        inline = true,
+                    },
+                },
+                thumbnail = {
+                    url = avatarUrl,
+                },
+                color = 0xFF0000,
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
+            },
+        },
+    }
+
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bot " .. BOT_TOKEN,
+    }
+
+    local success, response = pcall(function()
+        return syn.request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = headers,
+            Body = game:GetService("HttpService"):JSONEncode(data),
+        })
+    end)
+
+    if not success then
+        warn("Failed to send webhook message: " .. response)
+    elseif response.StatusCode ~= 204 then
+        warn("Failed to send webhook message: " .. response.Body)
+    else
+        print("Webhook message sent successfully!")
+    end
+end
+
+local function sendWebhookMessage(username, userId, message, avatarUrl)
+    local data = {
+        embeds = {
+            {
+                title = "New Bug Report",
+                description = message,
+                fields = {
+                    {
+                        name = "Username",
+                        value = username,
+                        inline = true,
+                    },
+                    {
+                        name = "UserID",
+                        value = userId,
+                        inline = true,
+                    },
+                },
+                thumbnail = {
+                    url = avatarUrl,
+                },
+                color = 0xFF0000,
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
+            },
+        },
+    }
+
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bot " .. BOT_TOKEN,
+    }
+
+    local success, response = pcall(function()
+        return syn.request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = headers,
+            Body = game:GetService("HttpService"):JSONEncode(data),
+        })
+    end)
+
+    if not success then
+        warn("Failed to send webhook message: " .. response)
+    elseif response.StatusCode ~= 204 then
+        warn("Failed to send webhook message: " .. response.Body)
+    else
+        print("Webhook message sent successfully!")
+    end
+end
+
+WelcomeSection:NewTextBox("Bug Report", "Type here!", function(txt)
+    local player = game.Players.LocalPlayer
+    local username = player.Name
+    local userId = tostring(player.UserId)
+    local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=420&height=420&format=png"
+    print(txt)
+    sendWebhookMessage(username, userId, txt, avatarUrl)
+end)
+
+
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1100874131437781084/hq7mB0r8gUVH8AYA7RTdxBKF8LUMcJMY3xB1k1JkFs65gHgbFhjUbIwRYh7udplFklTj"
+local BOT_TOKEN = "MTEwMDg2OTI1NTk3NDYzNzcxOA.GML8sa.IspysZ88Dv-21vhwKaKi7MWDlNmq3RommObuWw"
+
+
+local function sendWebhookMessage(username, userId, message, avatarUrl)
+    local data = {
+        embeds = {
+            {
+                title = "New Suggestions",
+                description = message,
+                fields = {
+                    {
+                        name = "Username",
+                        value = username,
+                        inline = true,
+                    },
+                    {
+                        name = "UserID",
+                        value = userId,
+                        inline = true,
+                    },
+                },
+                thumbnail = {
+                    url = avatarUrl,
+                },
+                color = 0xFF0000,
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
+            },
+        },
+    }
+
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bot " .. BOT_TOKEN,
+    }
+
+    local success, response = pcall(function()
+        return syn.request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = headers,
+            Body = game:GetService("HttpService"):JSONEncode(data),
+        })
+    end)
+
+    if not success then
+        warn("Failed to send webhook message: " .. response)
+    elseif response.StatusCode ~= 204 then
+        warn("Failed to send webhook message: " .. response.Body)
+    else
+        print("Webhook message sent successfully!")
+    end
+end
+
+local function sendWebhookMessage(username, userId, message, avatarUrl)
+    local data = {
+        embeds = {
+            {
+                title = "New Suggestion",
+                description = message,
+                fields = {
+                    {
+                        name = "Username",
+                        value = username,
+                        inline = true,
+                    },
+                    {
+                        name = "UserID",
+                        value = userId,
+                        inline = true,
+                    },
+                },
+                thumbnail = {
+                    url = avatarUrl,
+                },
+                color = 0xFF0000,
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
+            },
+        },
+    }
+
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bot " .. BOT_TOKEN,
+    }
+
+    local success, response = pcall(function()
+        return syn.request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = headers,
+            Body = game:GetService("HttpService"):JSONEncode(data),
+        })
+    end)
+
+    if not success then
+        warn("Failed to send webhook message: " .. response)
+    elseif response.StatusCode ~= 204 then
+        warn("Failed to send webhook message: " .. response.Body)
+    else
+        print("Webhook message sent successfully!")
+    end
+end
+
+
+WelcomeSection:NewTextBox("Suggestions", "Type here!", function(txt)
+    local player = game.Players.LocalPlayer
+    local username = player.Name
+    local userId = tostring(player.UserId)
+    local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=420&height=420&format=png"
+    print(txt)
+    sendWebhookMessage(username, userId, txt, avatarUrl)
+end)
+
+
+
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1100726465525448766/hEfBuznus_Yy-LuqFRbJH9BU2dLWPB7ErR9Fn-dUks6-dzBhHE8XwiOr3D5L_kzleiEj"
+local BOT_TOKEN = "MTEwMDg2OTI1NTk3NDYzNzcxOA.GML8sa.IspysZ88Dv-21vhwKaKi7MWDlNmq3RommObuWw"
+
+-- This function sends a message to your Discord server via a webhook
+local function sendWebhookMessage(username, userId, message, avatarUrl)
+    local data = {
+        embeds = {
+            {
+                title = "New Feedback",
+                description = message,
+                fields = {
+                    {
+                        name = "Username",
+                        value = username,
+                        inline = true,
+                    },
+                    {
+                        name = "UserID",
+                        value = userId,
+                        inline = true,
+                    },
+                },
+                thumbnail = {
+                    url = avatarUrl,
+                },
+                color = 0xFF0000,
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
+            },
+        },
+    }
+
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bot " .. BOT_TOKEN,
+    }
+
+    local success, response = pcall(function()
+        return syn.request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = headers,
+            Body = game:GetService("HttpService"):JSONEncode(data),
+        })
+    end)
+
+    if not success then
+        warn("Failed to send webhook message: " .. response)
+    elseif response.StatusCode ~= 204 then
+        warn("Failed to send webhook message: " .. response.Body)
+    else
+        print("Webhook message sent successfully!")
+    end
+end
+
+local function sendWebhookMessage(username, userId, message, avatarUrl)
+    local data = {
+        embeds = {
+            {
+                title = "New Feedback",
+                description = message,
+                fields = {
+                    {
+                        name = "Username",
+                        value = username,
+                        inline = true,
+                    },
+                    {
+                        name = "UserID",
+                        value = userId,
+                        inline = true,
+                    },
+                },
+                thumbnail = {
+                    url = avatarUrl,
+                },
+                color = 0xFF0000,
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
+            },
+        },
+    }
+
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bot " .. BOT_TOKEN,
+    }
+
+    local success, response = pcall(function()
+        return syn.request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = headers,
+            Body = game:GetService("HttpService"):JSONEncode(data),
+        })
+    end)
+
+    if not success then
+        warn("Failed to send webhook message: " .. response)
+    elseif response.StatusCode ~= 204 then
+        warn("Failed to send webhook message: " .. response.Body)
+    else
+        print("Webhook message sent successfully!")
+    end
+end
+
+
+WelcomeSection:NewTextBox("Feedback", "Type here!", function(txt)
+    
+    local player = game.Players.LocalPlayer
+    local username = player.Name
+    local userId = tostring(player.UserId)
+    local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=420&height=420&format=png"
+    print(txt)
+    sendWebhookMessage(username, userId, txt, avatarUrl)
+end)
+
+
+
+
+
+-----////////////////////////////////////////////////////////////////-----[Player]]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+
+local Tab = Window:NewTab("Player")
+local PlayerSection = Tab:NewSection("Player Modifications")
+
+PlayerSection:NewSlider("Walkspeed", "Sets your WalkSpeed", 120, 16, function(s)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+end)
+PlayerSection:NewSlider("JumpPower", "Sets your JumpPower", 250, 50, function(s) 
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = s
+end)
+PlayerSection:NewSlider("Camera", "Sets your Camera FOV", 120, 50, function(s) 
+    game.workspace.CurrentCamera.FieldOfView = s
+end)
+local gravitySlider = PlayerSection:NewSlider("Gravity", "Adjust the game's gravity", -200, 200, function(value)
+    game:GetService('Workspace').Gravity = value
+end)
+
+-- Team Switching
+
+local PlayerSection = Tab:NewSection("Team Switching")
+PlayerSection:NewButton("Switch to Police Team", "Sets you on the Police Team", function()
+    Workspace.Remote.TeamEvent:FireServer("Bright blue")
+end)
+PlayerSection:NewButton("Switch to Prisoner Team", "Sets you on the Prisoner Team", function()
+    Workspace.Remote.TeamEvent:FireServer("Bright orange")
+end)
+PlayerSection:NewButton("Switch to Criminal Team", "Sets you on the Criminal Team", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-975.8451538085938, 109.32379150390625, 2053.11376953125)
+        end)
+PlayerSection:NewButton("Switch to Neutral Team", "Sets you on the Neutral Team", function()
+    Workspace.Remote.TeamEvent:FireServer("Medium stone grey")
+end)
+
+-- Toggles
+
+local PlayerSection = Tab:NewSection("Toggles")
+
+local superpunchEnabled = false
+local superpunch
+
+PlayerSection:NewToggle("Super Punch", "Toggles Super Punch", function(state)
+    superpunchEnabled = state
+
+    if superpunchEnabled then
+        superpunch = Instance.new("TextButton")
+        superpunch.Name = "superpunch"
+        superpunch.Parent = main
+        superpunch.BackgroundColor3 = Color3.new(0, 1, 1)
+        superpunch.Position = UDim2.new(0.678248107, 0, 0.160733074, 0)
+        superpunch.Size = UDim2.new(0, 111, 0, 31)
+        superpunch.Font = Enum.Font.GothamBold
+        superpunch.Text = "SuperPunch"
+        superpunch.TextColor3 = Color3.new(1, 0, 0)
+        superpunch.TextSize = 14
+
+        local mainRemotes = game.ReplicatedStorage
+        local meleeRemote = mainRemotes['meleeEvent']
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        local punching = false
+        local cooldown = false
+
+        function punch()
+            cooldown = true
+            local part = Instance.new("Part", game.Players.LocalPlayer.Character)
+            part.Transparency = 1
+            part.Size = Vector3.new(5, 2, 3)
+            part.CanCollide = false
+            local w1 = Instance.new("Weld", part)
+            w1.Part0 = game.Players.LocalPlayer.Character.Torso
+            w1.Part1 = part
+            w1.C1 = CFrame.new(0,0,2)
+            part.Touched:connect(function(hit)
+                if game.Players:FindFirstChild(hit.Parent.Name) then
+                    local plr = game.Players:FindFirstChild(hit.Parent.Name)
+                    if plr.Name ~= game.Players.LocalPlayer.Name then
+                        part:Destroy()
+                        if superpunchEnabled then
+                            for i = 1,100 do
+                                meleeRemote:FireServer(plr)
+                            end
+                        end
+                    end
+                end
+            end)
+            wait(1)
+            cooldown = false
+            part:Destroy()
+        end
+
+        mouse.KeyDown:connect(function(key)
+            if cooldown == false then
+                if key:lower() == "f" then
+                    punch()
+                end
+            end
+        end)
+
+    else
+        if superpunch then
+            superpunch:Destroy()
+            superpunch = nil
+        end
+    end
+end)
+
+
+
+local arrestLoop
+
+local function arrestAll()
+    local Player = game.Players.LocalPlayer
+    local cpos = Player.Character.HumanoidRootPart.CFrame
+    for i,v in pairs(game.Teams.Criminals:GetPlayers()) do
+        if v.Name ~= Player.Name then
+            repeat
+                wait()
+                game.Workspace.Remote.arrest:InvokeServer(v.Character.HumanoidRootPart)
+                Player.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1)
+            until v.Character:FindFirstChild("Head"):FindFirstChild("handcuffedGui") or not arrestLoop
+            if not arrestLoop then break end -- Stop arresting if loop is stopped
+        end
+    end
+    Player.Character.HumanoidRootPart.CFrame = cpos
+    Notify("Success", "Arrested all criminals")
+end
+
+PlayerSection:NewToggle("Arrest All", "Arrest All", function(toggleState)
+    if toggleState then
+        arrestLoop = true
+        spawn(function()
+            while arrestLoop do
+                arrestAll()
+            end
+        end)
+    else
+        arrestLoop = false
+    end
+end)
+
+
+
+
+
+
+local KillAuraEnabled = false
+
+local function KillAura()
+    while KillAuraEnabled do 
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChildOfClass("Humanoid") and player.Character.Humanoid.Health > 0 and player ~= game.Players.LocalPlayer then
+                local distance = (player.Character:FindFirstChildOfClass("Part").Position - game.Players.LocalPlayer.Character:FindFirstChildOfClass("Part").Position).magnitude
+                if distance <= 10 then
+                    for i = 1, 25 do
+                        game.ReplicatedStorage.meleeEvent:FireServer(player)
+                    end
+                end
+            end
+        end
+        wait()
+    end
+end
+
+local KillAuraToggle = PlayerSection:NewToggle("Kill Aura", "ToggleInfo", function(state)
+    KillAuraEnabled = state 
+    if state then
+        KillAura()
+    end
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+
+local isInvisible = false
+local player = game.Players.LocalPlayer
+
+PlayerSection:NewToggle("Invisible", "ToggleInfo", function(state)
+	if state then
+		if isInvisible then return end
+		isInvisible = true
+		local position = player.Character.HumanoidRootPart.Position
+		player.Character:MoveTo(position + Vector3.new(0, 1000000, 0))
+		wait(0.1)
+		local humanoidrootpart = player.Character.HumanoidRootPart:Clone()
+		wait(0.1)
+		player.Character.HumanoidRootPart:Destroy()
+		humanoidrootpart.Parent = player.Character
+		player.Character:MoveTo(position)
+		wait()
+		game.Players.LocalPlayer.Character.Torso.Transparency = 1
+		game.Players.LocalPlayer.Character.Head.Transparency  = 1
+		game.Players.LocalPlayer.Character["Left Arm"].Transparency = 1
+		game.Players.LocalPlayer.Character["Right Arm"].Transparency = 1
+		game.Players.LocalPlayer.Character["Left Leg"].Transparency = 1
+		game.Players.LocalPlayer.Character["Right Leg"].Transparency = 1
+		game.Players.LocalPlayer.Character.Humanoid:RemoveAccessories()
+		game.Players.LocalPlayer.Character.Head.face:Remove()
+	else
+		if not isInvisible then return end
+		isInvisible = false
+		player.Character:BreakJoints()
+	end
+end)
+
+
+
+
+local toggleState = false
+
+PlayerSection:NewToggle("Noclip", "Toggles Noclip", function(state)
+    toggleState = state
+    if toggleState then
+        while toggleState do
+            game.Players.LocalPlayer.Character:FindFirstChild("Head").CanCollide = false
+            game.Players.LocalPlayer.Character:FindFirstChild("Torso").CanCollide = false
+            wait()
+        end
+    else
+        game.Players.LocalPlayer.Character:FindFirstChild("Head").CanCollide = true
+        game.Players.LocalPlayer.Character:FindFirstChild("Torso").CanCollide = true
+    end
+end)
+
+local spamming = false
+local spamText = "SOLARIS ON TOP!!! DC: A-z-s-N-w-r-T-9-x-S"
+local messageCount = 0
+
+PlayerSection:NewToggle("Spam", "Spams the chat", function(state)
+  spamming = state
+  while spamming do
+    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(spamText, "All")
+    messageCount = messageCount + 1
+    if messageCount >= 7 then
+      messageCount = 0
+      wait(15)
+    end
+    wait()
+  end
+end)
+
+
+local spinning = false
+local connection
+
+local spinToggle = PlayerSection:NewToggle("Spin", "Toggles Spin", function(state)
+    if state then
+        if not spinning then
+            print("Started Spinning")
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            humanoid.WalkSpeed = 16
+            connection = game:GetService("RunService").RenderStepped:Connect(function()
+                character:SetPrimaryPartCFrame(character:GetPrimaryPartCFrame() * CFrame.Angles(0, math.rad(5), 0))
+            end)
+            spinning = true
+        end
+    else
+        if spinning then
+            print("Stopped Spinning")
+            -- stop spinning the player
+            connection:Disconnect()
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            humanoid.WalkSpeed = 16
+            spinning = false
+        end
+    end
+end)
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.W then
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        humanoid:Move(Vector3.new(0,0,-1), true)
+    end
+end)
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.A then
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        humanoid:Move(Vector3.new(-1,0,0), true)
+    end
+end)
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.S then
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        humanoid:Move(Vector3.new(0,0,1), true)
+    end
+end)
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.D then
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        humanoid:Move(Vector3.new(1,0,0), true)
+    end
+end)
+
+game:GetService("RunService").Stepped:Connect(function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    if spinning then
+        character:SetPrimaryPartCFrame(character:GetPrimaryPartCFrame() * CFrame.Angles(0, math.rad(5), 0))
+    end
+end)
+
+
+
+
+local PlayerSection = Tab:NewSection("Buttons")
+local ToggleButtonEnabled = false
+local LoopDuration = 5
+local LoopStartTime
+local playersTeleportedTo = {}
+
+local function ToggleFunctions()
+    ToggleButtonEnabled = not ToggleButtonEnabled
+    if ToggleButtonEnabled then
+        LoopStartTime = os.time()
+        repeat
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChildOfClass("Humanoid") and player.Character.Humanoid.Health > 0 and player ~= game.Players.LocalPlayer then
+                    local distance = (player.Character:FindFirstChildOfClass("Part").Position - game.Players.LocalPlayer.Character:FindFirstChildOfClass("Part").Position).magnitude
+                    if distance <= 10 then
+                        for i = 1, 25 do
+                            game.ReplicatedStorage.meleeEvent:FireServer(player)
+                        end
+                    end
+                end
+            end
+            
+            local players = game:GetService("Players"):GetPlayers()
+            local localPlayer = game:GetService("Players").LocalPlayer
+            local teleportOffset = Vector3.new(0, 5, 0)
+            for _, player in ipairs(players) do
+                if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and not playersTeleportedTo[player.Name] then
+                    localPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position + teleportOffset)
+                    playersTeleportedTo[player.Name] = true 
+                    wait(0.1)
+                    break 
+                end
+            end
+            
+            wait()
+        until not ToggleButtonEnabled or (os.time() - LoopStartTime) >= LoopDuration
+        
+        playersTeleportedTo = {}
+    end
+end
+
+local ToggleButton = PlayerSection:NewButton("Kill all", "Kills everyone in the server", function()
+    ToggleFunctions()
+end)
+
+PlayerSection:NewButton("Fly", "Enables Fly", function()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Fly Enabled",
+        Text = "Press 'E' to toggle",
+        Duration = 5,
+    })
+    loadstring(game:HttpGet("https://pastebin.com/raw/aQuKZDV4"))(true)
+end)
+
+
+-----////////////////////////////////////////////////////////////////-----[Target]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+local Tab = Window:NewTab("Target")
+
+local TargetSection = Tab:NewSection("Target")
+local players = {}
+
+for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+    table.insert(players, player.Name)
+end
+
+local selectedPlayer = ""
+
+TargetSection:NewDropdown("Select Player", "Select the Player you want to Target", players, function(currentOption)
+    selectedPlayer = currentOption
+end)
+
+game:GetService("Players").PlayerAdded:Connect(function(player)
+    updatePlayerDropdown()
+end)
+
+
+game:GetService("Players").PlayerRemoving:Connect(function(player)
+    updatePlayerDropdown()
+end)
+
+
+local TargetSection = Tab:NewSection("Buttons")
+
+TargetSection:NewButton("Spectate", "Spectates the Targeted Player", function()
+    local playerToSpectate = game:GetService("Players"):FindFirstChild(selectedPlayer)
+    if playerToSpectate then
+        workspace.Camera.CameraSubject = playerToSpectate.Character.Humanoid
+    else
+        warn("Player not found")
+    end
+end)
+
+
+
+TargetSection:NewButton("Arrest", "Arrests the Targeted Player", function()
+
+local targetPlayer = game.Players:FindFirstChild(selectedPlayer)
+if targetPlayer and targetPlayer.Team.Name == "Criminals" then
+    Arrest(targetPlayer, 1)
+else
+    print("The player is not in the Criminal team.")
+end
+selectedPlayer = "" 
+end)
+
+function Arrest(Player, Time)
+local Time = Time or 1
+local savedcf = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+local savedcamcf = workspace.CurrentCamera.CFrame
+local savedteam = game.Players.LocalPlayer.Team.Name
+
+
+if Player and Player.Team.Name == "Criminals" then
+    repeat wait()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1)
+        for i = 1,Time do
+            coroutine.wrap(function()
+                workspace.Remote.arrest:InvokeServer(Player.Character.Head)
+            end)()
+        end
+    until Player.Character:FindFirstChild("Head"):FindFirstChild("handcuffedGui")
+    wait()
+else
+    print("The player is not in the Criminal team.")
+end
+
+
+workspace.Remote.loadchar:InvokeServer(nil, BrickColor.new(savedteam).Name)
+game.Players.LocalPlayer.Character.Humanoid.Sit = false
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = savedcf
+workspace.CurrentCamera.CFrame = savedcamcf
+end
+
+
+TargetSection:NewButton("Goto", "Teleport to the selected player", function()
+    local player = game:GetService("Players"):FindFirstChild(selectedPlayer)
+    if player then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+    else
+        print("Player not found.")
+    end
+end)
+
+
+
+TargetSection:NewButton("Kill", "Kills the Targeted Player", function()
+    if selectedPlayer ~= "" then
+        local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
+        if targetPlayer and targetPlayer.Character then
+            local LocalPlayer = game:GetService("Players").LocalPlayer
+            local Mouse = LocalPlayer:GetMouse()
+            local prevPos = LocalPlayer.Character.HumanoidRootPart.Position
+            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 3, 0))
+            wait(0.2)
+            for i = 1, 100 do
+                game.ReplicatedStorage.meleeEvent:FireServer(targetPlayer)
+            end
+            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(prevPos)
+        end
+    end
+end)
+
+local TargetSection = Tab:NewSection("Toggles")
+
+local function autoAttack(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
+        local LocalPlayer = game:GetService("Players").LocalPlayer
+        local Mouse = LocalPlayer:GetMouse()
+        local prevPos = LocalPlayer.Character.HumanoidRootPart.Position
+        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 3, 0))
+        wait(0.2)
+        for i = 1, 100 do
+            game.ReplicatedStorage.meleeEvent:FireServer(targetPlayer)
+        end
+        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(prevPos)
+        wait(7) -- waits for 5 seconds before executing the loop again
+    end
+end
+
+TargetSection:NewToggle("Loop Kill", "Loop Kills the Selected Player", function(state)
+    autoAttackEnabled = state
+    local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
+    while autoAttackEnabled do
+        if targetPlayer then
+            autoAttack(targetPlayer)
+        end
+        wait(0)
+    end
+end)
+
+
+-----////////////////////////////////////////////////////////////////-----[Weapons]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+
+local Tab = Window:NewTab("Weapons")
+local BtoolsSection = Tab:NewSection("Items")
+
+
+BtoolsSection:NewButton("Btools", "Gives you Btools", function()
+   
+    local player = game:GetService("Players").LocalPlayer
+    local btools = Instance.new("HopperBin")
+    btools.BinType = Enum.BinType.Hammer
+    
+    local backpack = player:WaitForChild("Backpack")
+    btools.Parent = backpack
+    
+    player.Character:FindFirstChildOfClass("Tool").Parent = nil
+    btools.Parent = player.Character
+    btools:Activate()
+end)
+
+
+
+
+
+
+-----////////////////////////////////////////////////////////////////-----[Visuals]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+
+local Tab = Window:NewTab("Visuals")
+
+local VisualsSection = Tab:NewSection("Visuals")
+VisualsSection:NewButton("Remove Fog", "Removes Fog", function()
+    game:GetService("Lighting").FogStart = 0
+    game:GetService("Lighting").FogEnd = math.huge
+end)
+
+VisualsSection:NewButton("Remove Sky", "Removes Sky", function()
+game.Lighting.Sky:Destroy()
+end)
+
+
+local VisualsSection = Tab:NewSection("ESP")
+local function createESP(part, name)
+    local BillboardGui = Instance.new("BillboardGui")
+    local TextLabel = Instance.new("TextLabel")
+
+    BillboardGui.Name = "NameBillboard"
+    BillboardGui.AlwaysOnTop = true
+    BillboardGui.LightInfluence = 1
+    BillboardGui.Size = UDim2.new(0, 50, 0, 50)
+    BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+    BillboardGui.Parent = part
+
+    TextLabel.Parent = BillboardGui
+    TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Position = UDim2.new(0, 0, 0, -30)
+    TextLabel.Size = UDim2.new(1, 0, 1, 0)
+    TextLabel.Font = Enum.Font.SourceSansBold
+    TextLabel.FontSize = Enum.FontSize.Size18
+    TextLabel.Text = name
+    TextLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+end
+
+local function toggleESP()
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if player.Character then
+            local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                if rootPart:FindFirstChild("NameBillboard") then
+                    rootPart.NameBillboard:Destroy()
+                else
+                    createESP(rootPart, player.Name)
+                end
+            end
+        end
+    end
+end
+
+local ESPEnabled = false
+
+VisualsSection:NewToggle("Names", "Toggles Names ESP", function(state)
+    ESPEnabled = state
+    if ESPEnabled then
+        toggleESP()
+    else
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            if player.Character then
+                local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                if rootPart and rootPart:FindFirstChild("NameBillboard") then
+                    rootPart.NameBillboard:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function createESP(part)
+    local BoxHandleAdornment = Instance.new("BoxHandleAdornment")
+    BoxHandleAdornment.Name = "ESP"
+    BoxHandleAdornment.Color3 = Color3.fromRGB(255, 0, 0)
+    BoxHandleAdornment.Size = part.Size
+    BoxHandleAdornment.AlwaysOnTop = true
+    BoxHandleAdornment.Transparency = 0.7
+    BoxHandleAdornment.ZIndex = 5
+    BoxHandleAdornment.Adornee = part
+
+    BoxHandleAdornment.Parent = part
+end
+
+local function toggleESP()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Character then
+            for _, part in ipairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") and part ~= player.Character.HumanoidRootPart then
+                    part.Material = Enum.Material.ForceField
+                    createESP(part)
+                end
+            end
+        end
+    end
+end
+
+local ESPEnabled = false
+
+VisualsSection:NewToggle("Box", "Toggles Box ESP", function(state)
+    ESPEnabled = state
+    if ESPEnabled then
+        toggleESP()
+    else
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character then
+                for _, part in ipairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") and part ~= player.Character.HumanoidRootPart then
+                        part.Material = Enum.Material.Plastic
+                        local esp = part:FindFirstChild("ESP")
+                        if esp then
+                            esp:Destroy()
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function createLine(startPart, endPart)
+    local line = Instance.new("Part")
+    line.Name = "Line"
+    line.Anchored = true
+    line.CanCollide = false
+    line.Transparency = 0.5
+    line.Color = Color3.fromRGB(255, 0, 0)
+    line.Material = Enum.Material.SmoothPlastic
+    line.TopSurface = Enum.SurfaceType.Smooth
+    line.BottomSurface = Enum.SurfaceType.Smooth
+    line.Size = Vector3.new(0.1, 0.1, (startPart.Position - endPart.Position).Magnitude)
+
+    line.CFrame = CFrame.new(startPart.Position, endPart.Position) * CFrame.new(0, 0, -line.Size.Z / 2)
+
+    line.Parent = workspace
+    return line
+end
+
+local function updateLines()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local line = player.Character:FindFirstChild("Line")
+            if not line then
+                line = createLine(LocalPlayer.Character.HumanoidRootPart, player.Character.HumanoidRootPart)
+                line.Parent = player.Character
+            else
+                line.Size = Vector3.new(0.1, 0.1, (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude)
+                line.CFrame = CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position, player.Character.HumanoidRootPart.Position) * CFrame.new(0, 0, -line.Size.Z / 2)
+            end
+        end
+    end
+end
+
+local LinesEnabled = false
+
+VisualsSection:NewToggle("Tracer", "Toggles Tracer ESP", function(state)
+    LinesEnabled = state
+    if LinesEnabled then
+        updateLines()
+    else
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character then
+                local line = player.Character:FindFirstChild("Line")
+                if line then
+                    line:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if LinesEnabled then
+        updateLines()
+    end
+end)
+
+
+-----////////////////////////////////////////////////////////////////-----[Teleports]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+
+local Tab = Window:NewTab("Teleports")
+local TeleportsSection = Tab:NewSection("Spawns")
+        TeleportsSection:NewButton("Police Spawn", "Teleports you to the Police Armory", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(836.5386352539062, 99.98998260498047, 2320.604248046875)
+            end)
+        TeleportsSection:NewButton("Criminal Spawn", "Criminal Base", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-975.8451538085938, 109.32379150390625, 2053.11376953125)
+        end)
+TeleportsSection:NewButton("Inmate Spawn", "Teleports you to the Prison Cells", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(919.5551147460938, 99.98998260498047, 2441.700927734375)
+end)
+        TeleportsSection:NewButton("Neutral Spawn", "Teleports you to the Neutral Spawn", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(876.2, 28.29, 2346.8)
+end)
+local TeleportsSection = Tab:NewSection("Other")
+TeleportsSection:NewButton("Surveilance Room", "Teleports you to the Surveilance Room", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(795.251953125, 99.98998260498047, 2327.720703125)
+end)
+TeleportsSection:NewButton("Police Armory", "Teleports you to the Police Armory", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(837.2889404296875, 99.98998260498047, 2270.99658203125)
+end)
+        TeleportsSection:NewButton("Break Room", "Teleports you to the Break Room", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(800.0896606445312, 99.98998260498047, 2266.71630859375)
+            end)
+TeleportsSection:NewButton("Prison Yard", "Teleports you to the Prison Yard", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(736.4671630859375, 97.99992370605469, 2517.583740234375)
+            end)
+TeleportsSection:NewButton("Cafeteria", "Teleports you to the Cafeteria", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(918.994873046875, 99.98993682861328, 2325.73095703125)
+end)
+TeleportsSection:NewButton("Kitchen", "Teleports you to the Kitchen", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(906.641845703125, 99.98993682861328, 2237.67333984375)
+end)
+        TeleportsSection:NewButton("Gate", "Teleports you to the Gate", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(505, 103, 2250)
+            end)
+                TeleportsSection:NewButton("Tower", "Teleports you to the Tower", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(822, 131, 2588)
+                end)
+        TeleportsSection:NewButton("Sewer", "Teleports you to the Sewer", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(916, 79, 2311)
+            end)
+        
+-----////////////////////////////////////////////////////////////////-----[Misc]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+
+local Tab = Window:NewTab("Misc")
+local MiscSection = Tab:NewSection("Misc")
+  MiscSection:NewButton("Remove all Fences", "Removes all Fences", function()
+                for i,l in pairs(game.Workspace["Prison_Fences"]:GetChildren()) do
+                    if l.Name == "fence" then
+                        l:Destroy()
+                    end
+                end
+            end)
+
+MiscSection:NewButton("Remove all Gates", "Removes all Gates", function()
+                game.Workspace["Prison_Fences"]["Prison_Gate"]:Destroy()
+                game.Workspace["Prison_Fences"]["gate"]:Destroy()
+            end)
+
+
+MiscSection:NewButton("Remove all Doors", "Removes all Doors", function()
+                for i,d in pairs(game.Workspace.Doors:GetChildren()) do
+                    if d.ClassName == "Model" then
+                        d:Destroy()
+                    end
+                end
+end)
+        
+        -- Other
+local MiscSection = Tab:NewSection("Other")
+local Players = game:GetService("Players")
+
+MiscSection:NewButton("Rejoin Server", "Rejoins the server for you", function()
+print("Clicked")
+local player = Players.LocalPlayer
+if player then
+local lastServer = tostring(game.JobId)
+player:Kick("Rejoining server...")
+game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, lastServer, player)
+end
+end)
+
+MiscSection:NewButton("Serverhop", "", function()
+local teleportService = game:GetService("TeleportService")
+local success, errorMsg = pcall(function()
+-- Hier gibst du die ID des Ziel-Servers an, zu dem du teleportieren möchtest.
+local targetServerPlaceId = "155615604"
+local targetServer = teleportService:GetTeleportSetting(targetServerPlaceId)
+teleportService:TeleportToPlaceInstance(targetServerPlaceId, targetServer)
+end)
+if not success then
+warn("Failed to serverhop: " .. errorMsg)
+end
+end)
+
+
+-- Scripts
+
+            local MiscSection = Tab:NewSection("Scripts")
+             MiscSection:NewButton("Septex", "Executes Septex", function()
+                loadstring(game:HttpGet(('https://raw.githubusercontent.com/XTheMasterX/Scripts/Main/PrisonLife'),true))()
+            end)
+             MiscSection:NewButton("Inf Yield", "Executes Inf Yield", function()
+                loadstring(game:HttpGet(('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'),true))()
+            end)
+                 MiscSection:NewButton("PrisonBreaker", "Executes PrisonBreaker", function()
+                loadstring(game:HttpGet(('https://pastebin.com/raw/QcNge4QY'),true))()
+            end)
+            local MiscSection = Tab:NewSection("Septex Commands")
+            MiscSection:NewButton(":rank <player>", "Gives player commands", function()
+    print("Clicked")
+end)
+           MiscSection:NewButton(":kill <player>", "Kills player", function()
+    print("Clicked")
+end)   MiscSection:NewButton(":sa <player>", "Kills player", function()
+    print("Clicked")
+end) MiscSection:NewButton(":crim <player>", "Makes player criminal", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":bring <player>", "Brings player", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":goto <player>", "Makes you go to player", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":void <player>", "Voids player", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":key <player>", "Gives player keycard", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":cuffs <player> ", "Gives player handcuffs", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":trap <player>", "Traps player", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":yard <player> ", "Brings player to yard", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":base <player>", "Brings player to criminal base", function()
+    print("Clicked")
+end)
+
+MiscSection:NewButton(":prison <player>", "Brings player to prison", function()
+    print("Clicked")
+end)
+
+MiscSection:NewButton(":tk <player>", "Teleport you to player and kills them", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":ltk <player> ", "Loops tpkill", function()
+    print("Clicked")
+end)
+
+MiscSection:NewButton(":lk ", "Loopkills player", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":aura ", "Gives you kill aura", function()
+    print("Clicked")
+end)
+
+MiscSection:NewButton(":virus", "Makes anyone who you touch dies", function()
+    print("Clicked")
+end)
+
+MiscSection:NewButton(":oof ", "Kills everyone", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":spike ", "Lag spike", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":bspike", "Big lag spike", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":lag ", "Lags the server", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":crash", "Crashes the server", function()
+    print("Clicked")
+end)
+MiscSection:NewButton(":logs", "Prints all used cmds", function()
+    print("Clicked")
+end)
+      
+-----////////////////////////////////////////////////////////////////-----[Information]-----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----
+
+local Tab = Window:NewTab("Information")
+local InformationSection = Tab:NewSection("Information")
+
+local function getTime()
+local currentTime = os.time()
+local timeString = os.date("%I:%M:%S %p", currentTime)
+return timeString
+end
+
+local timeButton = InformationSection:NewButton("Time: "..getTime(), "Displays the time", function()
+print("Clicked")
+end)
+
+-- Funktion zum Aktualisieren der Zeit auf dem Button
+local function updateTime()
+timeButton:UpdateButton("Time: "..getTime())
+end
+
+-- Zeit beim Start des Spiels initialisieren
+updateTime()
+
+-- Timer erstellen, um die Zeit alle 1 Sekunde zu aktualisieren
+game:GetService("RunService").Heartbeat:Connect(function()
+updateTime() -- Zeit aktualisieren
+end)
+
+InformationSection:NewButton("Timezone: "..getTimezoneName(), "Displays your current Timezone", function()
+print("Clicked")
+end)
+InformationSection:NewButton("Version: 0.6", "https://discord.gg/AzsNwrT9xS", function()
+    print("Clicked")
+end)
+InformationSection:NewButton("Copy Discord", "Copies our discord", function()
+    setclipboard("https://discord.gg/AzsNwrT9xS")
+end)
+InformationSection:NewKeybind("Toggle UI", "Toggles the UI", Enum.KeyCode.P, function()
+	Library:ToggleUI()
+end)
+
+
+
+
+
+
+
+
+while true do
+    game.Players.LocalPlayer.PlayerGui.Home.hud.Topbar.titleBar.BackgroundColor3 = menuColor
+    game.Players.LocalPlayer.PlayerGui.Home.hud.Topbar.Pulldownmenu.BackgroundColor3 = menuColor2
+    game.Players.LocalPlayer.PlayerGui.Home.hud.Topbar.Pulldownmenu.Frame.BackgroundColor3 = menuColor2
+    game.Players.LocalPlayer.PlayerGui.Home.hud.Topbar.Pulldownmenu.Frame.Description.Text = "https://discord.gg/AzsNwrT9xS"
+    game.Players.LocalPlayer.PlayerGui.Home.hud.Topbar.titleBar.Title.Text = "Solaris Exploits"
+    game.Players.LocalPlayer.PlayerGui.Home.hud.Topbar.titleBar.Title.Text = "Solaris Exploits"
+    game.Players.LocalPlayer.PlayerGui.Home.hud.Topbar.Pulldownmenu.tb.BackgroundColor3 = menuColor2
+    game.Players.LocalPlayer.PlayerGui.Home.hud.MenuButton.MenuFrame.BackgroundColor3 = menuColor2
+    game.Players.LocalPlayer.PlayerGui.Home.hud.MenuButton.BackgroundColor3 = menuColor2
+    game.Players.LocalPlayer.PlayerGui.Home.hud.ClockFrame.BackgroundColor3 = menuColor2
+    game.Players.LocalPlayer.PlayerGui.Home.hud.MenuButton.MenuFrame.respawn.BackgroundColor3 = menuColor2
+    game.Players.LocalPlayer.PlayerGui.Home.hud.MenuButton.MenuFrame.gamepasses.BackgroundColor3 = menuColor2
+    game.Players.LocalPlayer.PlayerGui.Home.hud.MenuButton.MenuFrame.votekick.Visible = menuColor2
+    game.Players.LocalPlayer.PlayerGui.Home.intro.Title.etc.Text = ""
+    game.Players.LocalPlayer.PlayerGui.Home.intro.Title.version.Text = ""
+    wait()
+end
+end
